@@ -1,0 +1,9 @@
+Teams
+* http://widget.cloud.opta.net/translations_v2/default/TN_default_1_de_DE_1_2015_22.json?jsoncallback=TN_default_1_de_DE_1_2015_22
+
+Players
+* http://widget.cloud.opta.net/translations_v2/default/PN_default_1_de_DE_1_2015_22_156.json?jsoncallback=PN_default_1_de_DE_1_2015_22_156
+
+Venues
+* http://widget.cloud.opta.net/translations_v2/default/VE_default_1_de_DE_1_2015_22.json?jsoncallback=VE_default_1_de_DE_1_2015_22
+
