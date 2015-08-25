@@ -6,11 +6,11 @@
 /**
  * Renders the league table.
  */
-var Leagues = React.createClass({
+var Teams = React.createClass({
     getInitialState: function () {
-        return {leagues:[]};
+        return {leagues:[], teams:[]};
     },
-    refresh: function () {
+    getLeagues: function () {
         var that=this;
         $.ajax({
             type: "GET",
@@ -20,39 +20,47 @@ var Leagues = React.createClass({
             }
         });
     },
+    getTeams: function () {
+        var that=this;
+        $.ajax({
+            type: "GET",
+            url: this.props.source + '/teams',
+            success: function (data) {
+                that.setState({teams:JSON.parse(data)});
+            }
+        });
+    },
     componentDidMount: function () {
-        this.refresh();
+        this.getLeagues();
+        this.getTeams();
     },
     render: function () {
         var that=this;
-        var createLeague = function (data) {
-            return (<LeagueEntry source={that.props.source} refreshCallback={that.refresh}
-                                 id={data.id} name={data.name}/>);
+        var createTeam = function (data) {
+            return (<TeamEntry source={that.props.source} refreshCallback={that.getTeams}
+                                 id={data.id} name={data.name} league={data.league_name}/>);
         };
-        // list all leagues and attach a row to add a league
-        var rows = this.state.leagues.map(createLeague);
-        rows.push(React.createElement(LeagueAdd, {source:this.props.source, refreshCallback:this.refresh}));
+        var rows = this.state.teams.map(createTeam);
+        rows.push(React.createElement(TeamAdd, {source:this.props.source,
+            refreshCallback:this.getTeams, leagues:this.state.leagues}));
 
         return (
             <div>
                 <table className="table table-striped">
-                    <thead><tr><th>id</th><th>name</th><th>function</th></tr></thead>
+                    <thead><tr><th>id</th><th>name</th><th>league</th><th>function</th></tr></thead>
                     <tbody>{rows}</tbody>
-                 </table>
+                </table>
             </div>
         );
     }
 });
 
-/**
- * League table entry.
- */
-var LeagueEntry = React.createClass({
+var TeamEntry = React.createClass({
     handleClick: function() {
         var that=this;
         $.ajax({
             type: "DELETE",
-            url: this.props.source + "/league/" + this.props.id,
+            url: this.props.source + "/team/" + this.props.id,
             success: function() { that.props.refreshCallback(); }
         });
     },
@@ -61,6 +69,7 @@ var LeagueEntry = React.createClass({
             <tr>
                 <td>{this.props.id}</td>
                 <td>{this.props.name}</td>
+                <td>{this.props.league}</td>
                 <td>
                     <button onClick={this.handleClick} type="button" className="btn btn-danger btn-xs">
                         <span className="glyphicon glyphicon-trash"></span> remove
@@ -74,23 +83,22 @@ var LeagueEntry = React.createClass({
 /**
  * Component to add a league.
  */
-var LeagueAdd = React.createClass({
+var TeamAdd = React.createClass({
     getInitialState: function () {
-        return {id:'', name:''};
-    },
-    handleIdChange: function (e) {
-        this.setState({id:e.target.value});
-    },
-    handleNameChange: function (e) {
-        this.setState({name:e.target.value});
+        return {leagues:this.props.leagues};
     },
     handleClick: function (e) {
         e.preventDefault();
+
+        var leagueId=$('select[name=leagueSelect]').val();
+        var id=$('input[name=teamId]').val();
+        var name=$('input[name=teamName]').val();
+
         var that=this;
         $.ajax({
             type: "POST",
-            url: this.props.source + '/league',
-            data: JSON.stringify({id:this.state.id, name:this.state.name}),
+            url: this.props.source + '/team',
+            data: JSON.stringify({id:id, name:name, leagueId:leagueId}),
             success: function() { that.props.refreshCallback(); },
             dataType: "json",
             error: function (jqXHR, exception) {
@@ -99,13 +107,22 @@ var LeagueAdd = React.createClass({
         });
     },
     render: function () {
+        var createOptions=function (data) {
+            return (<option value={data.id}>{data.name}</option>);
+        };
+        var options=this.state.leagues.map(createOptions);
         return (
             <tr>
                 <td>
-                    <input type="number" min="1" max="300" onChange={this.handleIdChange} value={this.state.id}/>
+                    <input name="teamId" type="number" min="1" value={this.state.id}/>
                 </td>
                 <td>
-                    <input onChange={this.handleNameChange} value={this.state.name}/>
+                    <input name="teamName" value={this.state.name}/>
+                </td>
+                <td>
+                    <select name="leagueSelect">
+                        {options}
+                    </select>
                 </td>
                 <td>
                     <button onClick={this.handleClick} type="button" className="btn btn-success btn-xs">
@@ -118,6 +135,6 @@ var LeagueAdd = React.createClass({
 });
 
 React.render(
-    <Leagues source="/api"/>,
+    <Teams source="/api"/>,
     document.getElementById('content')
 );

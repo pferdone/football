@@ -7,3 +7,5 @@ Players
 Venues
 * http://widget.cloud.opta.net/translations_v2/default/VE_default_1_de_DE_1_2015_22.json?jsoncallback=VE_default_1_de_DE_1_2015_22
 
+Competitions
+* http://widget.cloud.opta.net/translations_v2/default/CP_default_1_de_DE_1_2015.json?jsoncallback=CP_default_1_de_DE_1_2015

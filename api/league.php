@@ -9,7 +9,7 @@
 // API route
 $app->group('/api', function () use ($app, $db) {
     // get all leagues
-    $app->get('/league', function () use ($db) {
+    $app->get('/leagues', function () use ($db) {
         $stmt = $db->prepare('SELECT * from league group by id');
         if ($stmt->execute()) {
             echo json_encode($stmt->fetchAll(PDO::FETCH_ASSOC));
@@ -29,6 +29,8 @@ $app->group('/api', function () use ($app, $db) {
             ]);
 
             if (!$result) { throw new Exception(); }
+
+            echo json_encode([]);
         } catch (Exception $e) {
             error_log(var_export($stmt->errorInfo(), true));
             $app->halt(400, json_encode($stmt->errorInfo()));
@@ -45,16 +47,19 @@ $app->group('/api', function () use ($app, $db) {
             ]);
 
             if (!$result) { throw new Exception(); }
+
+            echo json_encode([]);
         } catch(Exception $e) {
             error_log(var_export($stmt->errorInfo(), true));
             $app->halt(400, json_encode($stmt->errorInfo()));
         }
     });
 
-    // get league by id
-    $app->group('/league', function() use ($app) {
-        $app->get('/:id', function ($id) {
-            echo '{'.$id.'}';
-        });
+    // get teams from league
+    $app->get('/league/:id/teams', function ($id) use ($db) {
+        $stmt = $db->prepare('select * from teams where league_id=:id');
+        if ($stmt->execute()) {
+            echo json_encode($stmt->fetchAll(PDO::FETCH_ASSOC));
+        }
     });
 });
